@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,14 +25,14 @@ public class UserController {
     }
 
     @GetMapping(value = "/")
-    public String allUsers(ModelMap model) {
+    public String getAllUsers(ModelMap model) {
         model.addAttribute("users", userService.getAllUsers());
         return "users";
     }
 
     @GetMapping(value = "/{id}")
-    public String User(@PathVariable("id") int id,
-                       ModelMap model) {
+    public String getUserById(@PathVariable("id") int id,
+                              ModelMap model) {
         return userService.getUserById(id).map(user -> {
                     model.addAttribute("user", user);
                     return "user";
@@ -38,27 +40,26 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(value = "/create")
-    public String create(@ModelAttribute("user") User user) {
+    @PostMapping(value = "/create")
+    public String showCreateForm(@ModelAttribute("user") User user) {
         return "add";
     }
 
     @PostMapping(value = "/create/add")
-    public String add(@ModelAttribute("user") User user) {
+    public String addUser(@ModelAttribute("user") User user) {
         userService.addUser(user);
         return "redirect:/" + user.getId();
     }
 
-    @PostMapping(value = "/{id}/update")
-    public String update(@PathVariable("id") int id, @ModelAttribute User user) {
-        userService.updateUser(id, user);
-        return "redirect:/" + user.getId();
+    @PatchMapping(value = "/{id}/update")
+    public String updateUser(@PathVariable("id") int id, @ModelAttribute User updatedUser) {
+        userService.updateUser(id, updatedUser);
+        return "redirect:/" + id;
     }
 
-    @PostMapping(value = "/{id}/delete")
-    public String delete(@PathVariable("id") int id) {
+    @DeleteMapping(value = "/{id}/delete")
+    public String deleteUserById(@PathVariable("id") int id) {
         userService.deleteUserById(id);
         return "redirect:/";
     }
-
 }
